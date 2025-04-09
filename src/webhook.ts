@@ -54,6 +54,9 @@ webhookRouter.post('/webhook', async (req: Request, res: Response): Promise<void
       const requesterPhone = `+351${((fields['Contacto Telefónico (from Membros)'] as string[])[0] || '')}`;
       const reviewer1Phone = `+351${((fields['Contacto Telefónico (from Reviewer 1)'] as string[])[0] || '')}`;
       const reviewer2Phone = `+351${((fields['Contacto Telefónico (from Reviewer 2)'] as string[])[0] || '')}`;
+      const requester_name = (record.get('Nome e Sobrenome (from Membros)') as string[])[0];
+      const reviewer2_name = (record.get('Nome e Sobrenome (from Reviewer 2)') as string[])[0];
+
       
       switch (buttonText) {
         case 'confirm order':
@@ -71,7 +74,7 @@ webhookRouter.post('/webhook', async (req: Request, res: Response): Promise<void
         case 'payment request created':
           await sendTextMessage({
             to: reviewer1Phone,
-            text: '✅ Reviewer 2 has been notified to authorize the payment.'
+            text: `✅ ${reviewer2_name} has been notified to authorize the payment.`
           });
           const msg = await sendTemplateMessage({
             to: reviewer2Phone,
@@ -85,7 +88,7 @@ webhookRouter.post('/webhook', async (req: Request, res: Response): Promise<void
         case 'payment authorized':
           await sendTextMessage({
             to: reviewer1Phone,
-            text: '✅ Payment has been authorized by Reviewer 2.'
+            text: `✅ Payment has been authorized by ${reviewer2_name}.`
           });
           await sendTextMessage({
             to: requesterPhone,
@@ -100,11 +103,11 @@ webhookRouter.post('/webhook', async (req: Request, res: Response): Promise<void
         case 'requester-paid':
           await sendTextMessage({
             to: reviewer1Phone,
-            text: '💸 The requester has completed the payment and filled the form.'
+            text: `💸 ${requester_name} has completed the payment and filled the form.`
           });
           await sendTextMessage({
             to: reviewer2Phone,
-            text: '💸 The requester has completed the payment and filled the form.'
+            text: `💸 ${requester_name} has completed the payment and filled the form.`
           });
           await base(TABLE_NAME).update(recordId, {
             'Follow-up Status': 'Complete',

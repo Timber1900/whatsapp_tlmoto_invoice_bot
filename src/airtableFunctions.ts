@@ -41,7 +41,6 @@ export async function updateAirtableApproval(recordId: string, messageId: string
   const reviewer1 = record.get('Reviewer 1 Message ID');
   const reviewer2 = record.get('Reviewer 2 Message ID');
   const requesterPhone = (record.get('Contacto Telefónico (from Membros)') as string[])[0];
-  console.log({reviewer1, reviewer2, messageId})
 
   const updates: any = {};
   if (reviewer1 === messageId) {
@@ -61,7 +60,7 @@ export async function updateAirtableApproval(recordId: string, messageId: string
       text: `${reviewer2_name} has reviewed the payment request!`
     });
   }
-  
+
   await base(TABLE_NAME).update(recordId, updates);
 }
 export async function updateAirtableDenial(recordId: string, messageId: string) {

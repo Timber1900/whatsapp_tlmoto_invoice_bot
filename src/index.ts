@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 import bodyParser from 'body-parser';
 import { webhookRouter } from './webhook';
 import cron from 'node-cron';
-import { pollForApprovedPurchases, pollForNewRecords } from './airtable_polling';
+import { pollForApprovedPurchases, pollForDeniedPurchases, pollForNewRecords } from './airtable_polling';
 
 
 dotenv.config();
@@ -26,4 +26,5 @@ cron.schedule('*/0.05 * * * *', () => {
   console.log('⏱️ Checking Airtable for new/updated records...');
   pollForNewRecords();
   pollForApprovedPurchases();
+  pollForDeniedPurchases();
 });
