@@ -14,20 +14,23 @@ export async function pollForNewRecords() {
   await base(TABLE_NAME)
     .select({
       filterByFormula: `AND(NOT({Confirmation message sent}), {Last Synced})`,
-      maxRecords: 10
+      maxRecords: 10 // adjust as needed
     })
     .eachPage(async (records, fetchNextPage) => {
       for (const record of records) {
+        // Send to your webhook
         try {
-          await processRecord(record, base);
-          recordsToSend.push(record.id);
+            await processRecord(record, base);
+            recordsToSend.push(record.id);
         } catch (err) {
           console.error(`❌ Failed to notify webhook for record ${record.id}`, err);
         }
       }
+
       fetchNextPage();
     });
 
+  // Mark records as synced
   for (const id of recordsToSend) {
     await base(TABLE_NAME).update(id, {
       'Confirmation message sent': true
@@ -36,7 +39,6 @@ export async function pollForNewRecords() {
 
   console.log(`✅ Processed ${recordsToSend.length} new records`);
 }
-
 
 export async function pollForApprovedPurchases() {
     const records = await base(TABLE_NAME)
