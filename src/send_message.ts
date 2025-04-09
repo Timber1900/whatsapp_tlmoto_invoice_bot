@@ -1,5 +1,5 @@
 import { AirtableBase } from 'airtable/lib/airtable_base';
-import { sendTemplateMessage } from './metaWhatsapp'; // your function
+import { sendTemplateMessage, sendTextMessage } from './metaWhatsapp'; // your function
 
 interface AirtableAttachment {
   url: string;
@@ -10,6 +10,7 @@ export async function processRecord(record: any, base: AirtableBase) {
   try {
     const phone_reviewer_1 = `+351${(record.fields['Contacto Telefónico (from Reviewer 1)'] || [])[0]}`;
     const phone_reviewer_2 = `+351${(record.fields['Contacto Telefónico (from Reviewer 2)'] || [])[0]}`;
+    const phone_requester = `+351${(record.fields['Contacto Telefónico (from Membros)'] || [])[0]}`;
     const requester_name = (record.fields['Nome e Sobrenome (from Membros)'] || [])[0];
     const description = record.fields['Description'] || '';
 
@@ -47,8 +48,6 @@ export async function processRecord(record: any, base: AirtableBase) {
       }
     ];
 
-    console.log(components)
-
     const result1 = await sendTemplateMessage({
       to: phone_reviewer_1,
       templateName: 'invoice_confimartion_template',
@@ -59,6 +58,11 @@ export async function processRecord(record: any, base: AirtableBase) {
       to: phone_reviewer_2,
       templateName: 'invoice_confimartion_template',
       components
+    });
+
+    await sendTextMessage({
+      to: phone_requester,
+      text: 'Invoice information has been sent to reviewers for confirmation!'
     });
 
     await base('Purchase Information').update(record.id, {

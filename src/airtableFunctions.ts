@@ -1,4 +1,5 @@
 import Airtable from 'airtable';
+import { sendTextMessage } from './metaWhatsapp';
 
 const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY }).base('appeE8B4XA2YHvpaI');
 const TABLE_NAME = 'Purchase Information';
@@ -39,17 +40,28 @@ export async function updateAirtableApproval(recordId: string, messageId: string
   const record = await base(TABLE_NAME).find(recordId);
   const reviewer1 = record.get('Reviewer 1 Message ID');
   const reviewer2 = record.get('Reviewer 2 Message ID');
+  const requesterPhone = (record.get('Contacto Telefónico (from Membros)') as string[])[0];
   console.log({reviewer1, reviewer2, messageId})
 
   const updates: any = {};
   if (reviewer1 === messageId) {
     updates['Reviewer 1 Reply Status'] = 'Accepted';
+    const reviewer1_name = (record.get('Nome e Sobrenome (from Reviewer 1)') as string[])[0];
+
+    await sendTextMessage({
+      to: `+351${requesterPhone}`,
+      text: `${reviewer1_name} has reviewed the payment request!`
+    });
   } else if (reviewer2 === messageId) {
     updates['Reviewer 2 Reply Status'] = 'Accepted';
+    const reviewer2_name = (record.get('Nome e Sobrenome (from Reviewer 2)') as string[])[0];
+
+    await sendTextMessage({
+      to: `+351${requesterPhone}`,
+      text: `${reviewer2_name} has reviewed the payment request!`
+    });
   }
-
-  console.log(updates)
-
+  
   await base(TABLE_NAME).update(recordId, updates);
 }
 export async function updateAirtableDenial(recordId: string, messageId: string) {
