@@ -67,13 +67,25 @@ export async function updateAirtableDenial(recordId: string, messageId: string) 
   const record = await base(TABLE_NAME).find(recordId);
   const reviewer1 = record.get('Reviewer 1 Message ID');
   const reviewer2 = record.get('Reviewer 2 Message ID');
-  console.log({reviewer1, reviewer2, messageId})
+  const requesterPhone = (record.get('Contacto Telefónico (from Membros)') as string[])[0];
 
   const updates: any = {};
   if (reviewer1 === messageId) {
     updates['Reviewer 1 Reply Status'] = 'Waiting for reason';
+    const reviewer1_name = (record.get('Nome e Sobrenome (from Reviewer 1)') as string[])[0];
+
+    await sendTextMessage({
+      to: `+351${requesterPhone}`,
+      text: `${reviewer1_name} has reviewed the payment request!`
+    });
   } else if (reviewer2 === messageId) {
     updates['Reviewer 2 Reply Status'] = 'Waiting for reason';
+    const reviewer2_name = (record.get('Nome e Sobrenome (from Reviewer 2)') as string[])[0];
+
+    await sendTextMessage({
+      to: `+351${requesterPhone}`,
+      text: `${reviewer2_name} has reviewed the payment request!`
+    });
   }
 
   console.log(updates)
