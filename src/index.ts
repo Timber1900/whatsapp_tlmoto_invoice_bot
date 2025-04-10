@@ -38,7 +38,7 @@ https.createServer(sslOptions, app).listen(PORT, () => {
 });
 
 // Schedule cron job to poll Airtable every 3 seconds
-cron.schedule('*/3 * * * * *', () => {
+cron.schedule('*/60 * * * * *', () => {
   console.log('⏱️ Checking Airtable for new/updated records...');
   pollForNewRecords();
   pollForApprovedPurchases();
